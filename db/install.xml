@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="filter/activitytiles/db" VERSION="20230525" COMMENT="XMLDB file for filter_activitytiles plugin."
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="filter_activitytiles" COMMENT="Module settings for Activity Tiles filter">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course_module" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="include" TYPE="int" LENGTH="2" NOTNULL="false" SEQUENCE="false"/>    
+        <FIELD NAME="icon" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>    
+        <FIELD NAME="image" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>        
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="course_module" TYPE="foreign" FIELDS="course_module" REFTABLE="course_module" REFFIELDS="id"/>        
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
