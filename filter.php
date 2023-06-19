@@ -93,9 +93,65 @@ class filter_activitytiles extends moodle_text_filter {
      * @return string
      */
     protected function get_modules($modtype) {  
-        global $PAGE;        
+        global $PAGE, $COURSE, $DB;
 
-        return '
+        $mods = get_course_mods($COURSE->id);
+
+        $query = "SELECT mdl_filter_activitytiles.*
+                  FROM mdl_filter_activitytiles
+                  JOIN mdl_course_modules
+                  ON mdl_filter_activitytiles.course_module = mdl_course_modules.module
+                  WHERE mdl_course_modules.course = :courseid";
+        $params = array('courseid' => $COURSE->id);
+        $resultSet = $DB->get_records_sql($query, $params);
+
+        $str = "";
+        $str.= '<div class="format-tiles">';
+        $str.= '<div class="course-content">';
+        $str.= '<ul class="tiles" id="multi_section_tiles">';
+
+        foreach ($mods as $mod) {
+            foreach($resultSet as $result) {
+                if ($mod->module == $result->course_module) {
+                    if (!($result->include)) {
+                        $str.= '<li class="tile tile-clickable" id="tile-1" data-section="1" data-true-sectionid="344" tabindex="2">
+                                    <div class="tile-bg"></div>
+                                    <a class="tile-link" href="https://moodle.develop-modular.com/moodle-4.1/mod/attendance/view.php?id=316" data-section="1" id="sectionlink-1">
+                                        <div class="tile-content" id="tilecontent-1">
+                                            <div class="tile-top" id="tileTop-1">
+                                                <div class="tileiconcontainer" id="tileicon_1">
+                                                    <span class="tile-icon">
+                                                        <i class="icon fa fa-home fa-fw " aria-hidden="true"></i>
+                                                    </span>
+                                                </div>
+                                                <div class="tiletopright pull-right" id="tiletopright-1" aria-hidden="true"></div>
+                                            </div>
+                                            <div class="tile-text" id="tileText-1">
+                                                <div class="tile-textinner" id="tileTextin-1">
+                                                    <h3>Attendance 1</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>';
+                    }
+                }
+            }
+        }
+
+        $str.= '</ul>
+                </div></div>
+        </div>';
+
+        return $str;
+
+    
+
+        
+
+        
+
+        /*return '
         <div class="format-tiles">
     <div class="course-content">
         <ul class="tiles" id="multi_section_tiles">
@@ -187,7 +243,7 @@ class filter_activitytiles extends moodle_text_filter {
             <li class="tile spacer" aria-hidden="true" id="lasttile"></li>
         </ul>
         </div></div>
-</div>';
+</div>';*/
         
     }
 
