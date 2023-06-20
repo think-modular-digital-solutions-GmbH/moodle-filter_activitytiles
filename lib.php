@@ -99,6 +99,7 @@ function filter_activitytiles_coursemodule_edit_post_actions($data, $course) {
 
     // Get settings from form.
     $at_settings = new stdClass;
+    $at_settings->courseid = $COURSE->id;
     $at_settings->course_module = $data->coursemodule;
     $at_settings->include = property_exists($data, 'activitytiles_include');
     $at_settings->icon = $data->activitytiles_icon;

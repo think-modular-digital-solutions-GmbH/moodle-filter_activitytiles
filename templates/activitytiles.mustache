@@ -1,4 +1,28 @@
 {{#mods}}
-
-
-{{/mod}}
+<div class="format-tiles">
+    <div class="course-content">
+        <ul class="tiles" id="multi_section_tiles">
+            <li class="tile tile-clickable">
+                <div class="tile-bg"></div>
+                <a class="tile-link" href="{{url}}">
+                    <div class="tile-content" id="tilecontent-1">
+                        <div class="tile-top" id="tileTop-1">
+                            <div class="tileiconcontainer" id="tileicon_1">
+                                <span class="tile-icon">
+                                    <i class="icon fa {{icon}} fa-fw " aria-hidden="true"></i>
+                                </span>
+                            </div>
+                            <div class="tiletopright pull-right" id="tiletopright-1" aria-hidden="true"></div>
+                        </div>
+                        <div class="tile-text" id="tileText-1">
+                            <div class="tile-textinner" id="tileTextin-1">
+                                <h3>{{title}}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+{{/mods}}
