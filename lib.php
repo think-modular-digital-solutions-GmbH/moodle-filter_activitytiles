@@ -40,7 +40,8 @@ function filter_activitytiles_get_additional_form_elements($mform) {
     $mform->addElement('checkbox', 'activitytiles_include', get_string('include', 'filter_activitytiles'));
 
     // Fontawesome icon select.
-    $options = array('edit' => 'fa-edit',
+    $options = array('' => 'select',
+                     'edit' => 'fa-edit',
                      'home' => 'fa-home',
                      'book' => 'fa-book');
     $mform->addElement('select', 'activitytiles_icon', get_string('icon', 'filter_activitytiles'), $options);
@@ -48,8 +49,8 @@ function filter_activitytiles_get_additional_form_elements($mform) {
     // Image.
     $maxbytes = get_real_size('300K');
     $imagetypes = '.jpg, .jpeg, .gif, .svg, .png';
-    $mform->addElement('filepicker', 'activitytiles_image', get_string('image', 'filter_activitytiles'), 
-        null, array('maxbytes' => $maxbytes, 'accepted_types' => $imagetypes));
+    $mform->addElement('filemanager', 'activitytiles_image', get_string('image', 'filter_activitytiles'), 
+        null, array('maxbytes' => $maxbytes, 'accepted_types' => $imagetypes, 'maxfiles' => 1));
 
     // Load our defaults.
     $course_module_id = $PAGE->context->__get('instanceid');

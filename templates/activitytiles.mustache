@@ -1,28 +1,30 @@
-{{#mods}}
-<div class="format-tiles">
-    <div class="course-content">
-        <ul class="tiles" id="multi_section_tiles">
-            <li class="tile tile-clickable">
-                <div class="tile-bg"></div>
-                <a class="tile-link" href="{{url}}">
-                    <div class="tile-content" id="tilecontent-1">
-                        <div class="tile-top" id="tileTop-1">
-                            <div class="tileiconcontainer" id="tileicon_1">
-                                <span class="tile-icon">
-                                    <i class="icon fa {{icon}} fa-fw " aria-hidden="true"></i>
-                                </span>
+<div class="modchoosercontainer">
+    <div class="optionscontainer d-flex flex-wrap p-1 mw-100 position-relative">
+        {{#mods}}
+            <a href="{{url}}">
+                <div role="menuitem" tabindex="0" aria-label={{title}} class="option border-0 card m-1 bg-white">                    
+                    {{#image}}
+                        <i class="fa fa-{{icon}} fa-fw"></i>
+                    {{/image}}   
+
+                    {{^image}}
+                        {{#icon}}
+                            <h1>
+                                <i class="fa {{icon}}"></i>
+                            </h1>
+                        {{/icon}}
+                        
+                        {{^icon}}
+                            <div class="optioninfo card-body d-flex flex-column text-center p-1">                    
+                                <div class="optionicon mt-2 mb-1 mx-auto icon-no-margin modicon_assign activityiconcontainer {{purpose}}">
+                                    <img class="icon activityicon " aria-hidden="true" src="https://moodle.develop-modular.com/moodle-4.1/theme/image.php?theme=sqportal&amp;component=assign&amp;image=monologo">
+                                </div>
+                                <div class="optionname clamp-2">{{title}}</div>                           
                             </div>
-                            <div class="tiletopright pull-right" id="tiletopright-1" aria-hidden="true"></div>
-                        </div>
-                        <div class="tile-text" id="tileText-1">
-                            <div class="tile-textinner" id="tileTextin-1">
-                                <h3>{{title}}</h3>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </li>
-        </ul>
+                        {{/icon}}
+                    {{/image}}                    
+                </div>
+            </a>       
+        {{/mods}}
     </div>
 </div>
-{{/mods}}

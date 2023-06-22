@@ -93,7 +93,7 @@ class filter_activitytiles extends moodle_text_filter {
      * @return string
      */
     protected function get_modules($filtertext) {  
-        global $COURSE, $DB, $OUTPUT;
+        global $COURSE, $DB, $OUTPUT, $USER;
 
         // See if a module type was specified.        
         if (strpos($filtertext, ':')) {
@@ -126,23 +126,37 @@ class filter_activitytiles extends moodle_text_filter {
             $order += strpos($mod->sequence, $mod->course_module);
             $sorted_mods[$order] = $mod;
         }
-        ksort($sorted_mods);
-
-        // TODO: get activity type purpose.
+        ksort($sorted_mods);        
         
         // Prepare data for export to template.
         $data['mods'] = array();
-        foreach ($sorted_mods as $mod) {
+
+        // echo "<pre>";
+        // var_dump($sorted_mods);
+        // die();
+
+        foreach ($sorted_mods as $mod) {            
+
+            // Get activity type purpose.
+            $mod->purpose = '';
+            $function = $mod->name . '_supports';
+            if (function_exists($function)) {
+                $mod->purpose = $function(FEATURE_MOD_PURPOSE);
+            }             
+
+            // Create array for mustache.
             $data['mods'][] = array(                
                 'id' => $mod->course_module,
                 'icon' => $mod->icon,
                 'image' => $mod->image,
+                'purpose' => $mod->purpose,
                 'title' => $DB->get_record($mod->name, array('id' => $mod->instance))->name,
                 'type' => $mod->name, 
                 'url' => "/mod/$mod->name/view.php?id=$mod->course_module",
             );
         }
 
+        // Render from template.
         $template = 'activitytiles';
         return $OUTPUT->render_from_template('filter_activitytiles/' . $template, $data);   ;
         
