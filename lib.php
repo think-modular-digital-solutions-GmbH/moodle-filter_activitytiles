@@ -50,16 +50,30 @@ function filter_activitytiles_get_additional_form_elements($mform) {
     $maxbytes = get_real_size('300K');
     $imagetypes = '.jpg, .jpeg, .gif, .svg, .png';
     $mform->addElement('filemanager', 'activitytiles_image', get_string('image', 'filter_activitytiles'), 
-        null, array('maxbytes' => $maxbytes, 'accepted_types' => $imagetypes, 'maxfiles' => 1));
+        null, array('subdirs' => 0, 
+                    'maxbytes' => $maxbytes, 
+                    'areamaxbytes' => $maxbytes, 
+                    'accepted_types' => $imagetypes, 
+                    'maxfiles' => 1,
+                    'return_types' => FILE_INTERNAL | FILE_EXTERNAL,
+                    ));
 
     // Load our defaults.
     $course_module_id = $PAGE->context->__get('instanceid');
     
     if ($at_settings = $DB->get_record('filter_activitytiles', array('course_module' => $course_module_id))) {
-
         $mform->setDefault('activitytiles_include', $at_settings->include);
         $mform->setDefault('activitytiles_icon', $at_settings->icon);
-        $mform->setDefault('activitytiles_image', $at_settings->image);
+
+        // Load image.
+        $draftitemid = file_get_submitted_draft_itemid('activitytiles_image');
+        file_prepare_draft_area($draftitemid, $PAGE->context->id, 'filter_activitytiles', 'activitytiles_image', 
+            $at_settings->id, array('subdirs' => 0, 
+                                    'maxbytes' => $maxbytes, 
+                                    'maxfiles' => 1,
+            ));
+
+        $mform->setDefault('activitytiles_image', $draftitemid);
     }
 
 }
@@ -95,7 +109,7 @@ function filter_activitytiles_coursesection_standard_elements($formwrapper, $mfo
  * @return object
  */
 function filter_activitytiles_coursemodule_edit_post_actions($data, $course) {
-    global $COURSE, $DB;
+    global $COURSE, $DB, $PAGE;
     // TODO: check if filter is enabled in course.
 
     // Get settings from form.
@@ -103,16 +117,22 @@ function filter_activitytiles_coursemodule_edit_post_actions($data, $course) {
     $at_settings->courseid = $COURSE->id;
     $at_settings->course_module = $data->coursemodule;
     $at_settings->include = property_exists($data, 'activitytiles_include');
-    $at_settings->icon = $data->activitytiles_icon;
-    $at_settings->image = $data->activitytiles_image;
+    $at_settings->icon = $data->activitytiles_icon;    
     
     // Update existing record or insert new one.
     if ($at_settings_id = $DB->get_record('filter_activitytiles', array('course_module' => $data->coursemodule), 'id')) {
         $at_settings->id = $at_settings_id->id;
         $DB->update_record('filter_activitytiles', $at_settings);
     } else {
-        $DB->insert_record('filter_activitytiles', $at_settings);
+        $at_settings->id = $DB->insert_record('filter_activitytiles', $at_settings)->id;
     }
+
+    // Save image.
+    file_save_draft_area_files($data->activitytiles_image, $PAGE->context->id, 'filter_activitytiles', 'activitytiles_image', 
+        $at_settings->id, array('subdirs' => 0, 
+                               'maxbytes' => get_real_size('300K'),
+                               'maxfiles' => 1,
+                            ));    
     
     return $data;
 }
