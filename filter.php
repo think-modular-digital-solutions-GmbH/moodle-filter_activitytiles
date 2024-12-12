@@ -17,7 +17,7 @@
 
 /**
  * @package    filter_activitytiles
- * @copyright  2023 think-modular 
+ * @copyright  2023 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -25,33 +25,30 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/course/renderer.php');
 
-// Returns course cards for all courses that meet the search criteria.
-
 /**
  * Implementation of the Moodle filter API for the Courselist filter.
- * 
+ *
  * @copyright  2023 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class filter_activitytiles extends moodle_text_filter {    
+class filter_activitytiles extends moodle_text_filter {
 
-    const TOKEN = '{activitytiles';    
+    const TOKEN = '{activitytiles';
 
     function filter($text, array $options = array()) {
-        global $CFG, $PAGE;        
-        
+        global $CFG, $PAGE;
+
         if (empty($text) or is_numeric($text)) {
             return $text;
-        }                        
+        }
 
-        if (strpos($text, self::TOKEN) !== false) {                   
+        if (strpos($text, self::TOKEN) !== false) {
             return $this->apply($text);
         } else {
             return $text;
-        }        
+        }
     }
-
 
     /**
      * Does the actual filtering.
@@ -59,46 +56,54 @@ class filter_activitytiles extends moodle_text_filter {
      * @param string $text
      * @return string
      */
-    protected function apply($text) {        
+    protected function apply($text) {
 
         // Split text into parts.
         $regex = '@(?=' . self::TOKEN . ')@';
-        $parts = preg_split($regex, $text);   
-        
-        foreach ($parts as $key => $part) {                        
-            
-            if (strpos($part, self::TOKEN) === 0) {                   
-                
-                $atoms = explode('}', $part);    
+        $parts = preg_split($regex, $text);
+
+        foreach ($parts as $key => $part) {
+
+            if (strpos($part, self::TOKEN) === 0) {
+
+                $atoms = explode('}', $part);
 
                 // Check filter integrity.
-                if (count($atoms) == 2) {                    
-                    $atoms[0] = $this->get_modules($atoms[0]);
+                if (count($atoms) == 2) {
+                    $atoms[0] = $this->getHtml($atoms[0]);
                     $parts[$key] = implode($atoms);
                 } else {
                     return $this->return_error($text);
                 }
-            }     
-        }    
+            }
+        }
+
 
         return implode($parts);
-        
     }
-
 
     /**
      * Returns a list of modules in this course according to filter options.
-     * 
+     *
      * @param string $filtertext text to be replaced
      * @return string
      */
-    protected function get_modules($filtertext) {  
+    protected function getHtml($filtertext) {
         global $COURSE, $DB, $OUTPUT, $USER;
 
-        // See if a module type was specified.        
+        // See if a module type was specified.
         if (strpos($filtertext, ':')) {
-            $modtype = trim(explode(':', $filtertext)[1]);
+            $type = trim(explode(':', $filtertext)[1]);
         }
+        if ($type == 'selected') {
+            $selected = true;
+        } else {
+            $modtype = $type;
+        }
+
+        // echo "<pre>";
+        // var_dump($modtype);
+        // die();
 
         // Build SQL across three tables.
         $sql = "SELECT fat.*, mods.name, cms.instance, cs.sequence, cs.section
@@ -110,68 +115,97 @@ class filter_activitytiles extends moodle_text_filter {
                   JOIN {course_sections} cs
                     ON cms.section = cs.id
                  WHERE cms.course = :courseid";
-        
+
         // Add additional WHERE if modtype is specified.
         if (isset($modtype)) {
-            $sql .= "AND mods.name = :name"; 
+            $sql .= "AND mods.name = :name";
         }
-                   
+
+        // Add addtional WHERE if only selected mods should be shown.
+        if (isset($selected)) {
+            $sql .= "AND fat.include = 1";
+        }
+
+        // We really do not need labels either way.
+        $sql .= " AND mods.name != 'label'";
+
         // Run query.
-        $params = array('courseid' => $COURSE->id, 'name' => $modtype);
-        $mods = $DB->get_records_sql($sql, $params);
-        
+        if (!empty($modtype)) {
+            $params = array('courseid' => $COURSE->id, 'name' => $modtype);
+        } else {
+            $params = array('courseid' => $COURSE->id);
+        }
+        if (!$mods = $DB->get_records_sql($sql, $params)) {
+            return '';
+        }
+
         // Sort by position in section.
         foreach ($mods as $mod) {
             $order = $mod->section * 1000;
             $order += strpos($mod->sequence, $mod->course_module);
             $sorted_mods[$order] = $mod;
         }
-        ksort($sorted_mods);        
-        
+        ksort($sorted_mods);
+
         // Prepare data for export to template.
         $data['mods'] = array();
-
-        // echo "<pre>";
-        // var_dump($sorted_mods);
-        // die();
-
-        foreach ($sorted_mods as $mod) {            
+        foreach ($sorted_mods as $mod) {
 
             // Get activity type purpose.
             $mod->purpose = '';
             $function = $mod->name . '_supports';
             if (function_exists($function)) {
                 $mod->purpose = $function(FEATURE_MOD_PURPOSE);
-            }             
+            }
+
+            // Retrieve image.
+            $context = context_module::instance($mod->course_module);
+
+            // $imageurl = moodle_url::make_pluginfile_url($context->id, 'filter_activitytiles', 'activitytiles_image',
+            //     0, '/', 'raspi.jpeg', false);
+                 $fs = get_file_storage();
+                 //$files = $fs->get_area_files($context->id, 'filter_activitytiles', 'activitytiles_image');
+                 $files = $fs->get_area_files($context->id, 'filter_activitytiles', 'activitytiles_image');
+
+
+            //     $file = $fs->get_file($context->id, 'filter_activitytiles', 'activitytiles_image', 0, '/', 600357973);
+            // echo "<pre>";
+            // var_dump($file);
+            // var_dump($imageurl->__toString());
+            // die();
 
             // Create array for mustache.
-            $data['mods'][] = array(                
+            $data['mods'][] = array(
                 'id' => $mod->course_module,
                 'icon' => $mod->icon,
-                'image' => $mod->image,
+                // 'image' => $imageurl,
                 'purpose' => $mod->purpose,
                 'title' => $DB->get_record($mod->name, array('id' => $mod->instance))->name,
-                'type' => $mod->name, 
+                'type' => $mod->name,
                 'url' => "/mod/$mod->name/view.php?id=$mod->course_module",
             );
         }
 
+        // echo "<pre>";
+        // var_dump($data);
+        // die();
+
         // Render from template.
         $template = 'activitytiles';
         return $OUTPUT->render_from_template('filter_activitytiles/' . $template, $data);   ;
-        
+
     }
 
 
     /**
      * Returns original text plus error message.
-     * 
-     * @param string $text 
+     *
+     * @param string $text
      * @return string
      */
     protected function return_error($text) {
         $errormsg = get_string('errormsg', 'filter_activitytiles');
         return '<div class="alert alert-danger">' . $errormsg . '</div>' . $text;
     }
-     
+
 }

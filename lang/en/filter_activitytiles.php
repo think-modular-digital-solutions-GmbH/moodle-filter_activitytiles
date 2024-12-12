@@ -26,6 +26,6 @@
 $string['filtername'] = 'Activity Tiles';
 $string['errormsg'] = 'Malformed activitytiles filter found - ignoring all activitytiles elements in this text.';
 $string['include'] = 'Include this activity';
-$string['icon'] = 'Icon for this activity';
+$string['icon'] = 'Fontaweseome icon for this activity (eg: edit, book, globe, ...)';
 $string['image'] = 'Image for this activity';
 $string['privacy:metadata'] = 'The Activity Tiles filter plugin does not store any personal data.';
