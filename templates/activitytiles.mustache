@@ -1,32 +1,41 @@
-<div class="modchoosercontainer">
-    <div class="optionscontainer d-flex flex-wrap p-1 mw-100 position-relative">
-        {{#mods}}
-            <a href="{{url}}">
-                <div role="menuitem" tabindex="0" aria-label={{title}} class="option border-0 card m-1 bg-white">
-                    {{#image}}
-                        <i class="fa fa-{{icon}} fa-fw"></i>
-                    {{/image}}
-
+<div class="card-deck dashboard-card-deck " data-region="card-deck" role="list">
+    {{#mods}}
+        <div class="card dashboard-card" role="listitem" data-region="course-content">
+            <a class="text-decoration-none" href="{{url}}" tabindex="-1">
+                <div class="card-img dashboard-card-img activitytiles-image" style="background-image: url({{image}});">
+                    <div class="course-category activitytiles-topic">
+                        {{topic}}
+                        <span class="sr-only">Activity image</span>
+                    </div>
                     {{^image}}
                         {{#icon}}
-                        <i class="fa yen-sign"></i>
-                        <i class="fa fa-stop-circle"></i>
-                            <h1>
-                                <i class="fa-sharp fa-solid fa-database"></i>
-                            </h1>
+                            <i class="activitytiles-modicon fa fa-{{icon}} fa-fw"></i>
                         {{/icon}}
-
                         {{^icon}}
-                            <div class="optioninfo card-body d-flex flex-column text-center p-1">
-                                <div class="optionicon mt-2 mb-1 mx-auto icon-no-margin modicon_assign activityiconcontainer {{purpose}}">
-                                    <img class="icon activityicon " aria-hidden="true" src="https://moodle.develop-modular.com/moodle-4.1/theme/image.php?theme=sqportal&amp;component=assign&amp;image=monologo">
-                                </div>
-                                <div class="optionname clamp-2">{{title}}</div>
+                            <div class="activitytiles-modicon optionicon icon-no-margin modicon_assign activityiconcontainer {{purpose}}">
+                                <img class="icon activityicon" aria-hidden="true" src="{{ iconurl }}">
                             </div>
                         {{/icon}}
                     {{/image}}
                 </div>
             </a>
-        {{/mods}}
-    </div>
+            <div class="card-body pr-1 course-info-container" id="course-info-container-186-5">
+                <div class="d-flex align-items-start">
+                    <div class="w-100">
+                        <a class="text-decoration-none" href="{{url}}" class="aalink coursename mr-2 mb-1">
+                            <span class="sr-only">
+                                Course name
+                            </span>
+                            <span class="multiline">
+                                {{title}}
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {{/mods}}
 </div>
+
+
+

@@ -23,6 +23,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+define('MAX_BYTES', get_real_size('500K'));
+define('IMAGE_TYPES', '.jpg, .jpeg, .gif, .svg, .png');
+
 /**
  * Get additional elements for forms.
  *
@@ -50,16 +53,15 @@ function filter_activitytiles_get_additional_form_elements($mform) {
     $mform->setType('activitytiles_icon', PARAM_TEXT);
 
     // Image.
-    $maxbytes = get_real_size('300K');
-    $imagetypes = '.jpg, .jpeg, .gif, .svg, .png';
     $mform->addElement('filemanager', 'activitytiles_image', get_string('image', 'filter_activitytiles'),
         null, array('subdirs' => 0,
-                    'maxbytes' => $maxbytes,
-                    'areamaxbytes' => $maxbytes,
-                    'accepted_types' => $imagetypes,
+                    'maxbytes' => MAX_BYTES,
+                    'areamaxbytes' => MAX_BYTES,
+                    'accepted_types' => IMAGE_TYPES,
                     'maxfiles' => 1,
                     'return_types' => FILE_INTERNAL | FILE_EXTERNAL,
                     ));
+
 
     // Load our defaults.
     $course_module_id = $PAGE->context->__get('instanceid');
@@ -70,15 +72,18 @@ function filter_activitytiles_get_additional_form_elements($mform) {
 
         // Load image.
         $draftitemid = file_get_submitted_draft_itemid('activitytiles_image');
-        file_prepare_draft_area($draftitemid, $PAGE->context->id, 'filter_activitytiles', 'activitytiles_image',
-            $at_settings->id, array('subdirs' => 0,
-                                    'maxbytes' => $maxbytes,
-                                    'maxfiles' => 1,
-            ));
+        file_prepare_draft_area($draftitemid,
+                                $context->id,
+                                'filter_activitytiles',
+                                'activitytiles_image',
+                                $at_settings->id,
+                                array('subdirs' => 0,
+                                      'maxbytes' => MAX_BYTES,
+                                      'maxfiles' => 1,
+                                ));
 
         $mform->setDefault('activitytiles_image', $draftitemid);
     }
-
 }
 
 /**
@@ -114,7 +119,13 @@ function filter_activitytiles_coursesection_standard_elements($formwrapper, $mfo
  */
 function filter_activitytiles_coursemodule_edit_post_actions($data, $course) {
     global $COURSE, $DB, $PAGE;
-    // TODO: check if filter is enabled in course.
+
+    // Check if the filter is enabled in the course.
+    $context = $PAGE->context;
+    $course_context = $context->get_course_context();
+    if (!filter_is_enabled('activitytiles', $context)) {
+        return;
+    }
 
     // Get settings from form.
     $at_settings = new stdClass;
@@ -122,6 +133,7 @@ function filter_activitytiles_coursemodule_edit_post_actions($data, $course) {
     $at_settings->course_module = $data->coursemodule;
     $at_settings->include = property_exists($data, 'activitytiles_include');
     $at_settings->icon = $data->activitytiles_icon;
+    $at_settings->image = $data->activitytiles_image;
 
     // Update existing record or insert new one.
     if ($at_settings_id = $DB->get_record('filter_activitytiles', array('course_module' => $data->coursemodule), 'id')) {
@@ -132,58 +144,61 @@ function filter_activitytiles_coursemodule_edit_post_actions($data, $course) {
     }
 
     // Save image.
-    file_save_draft_area_files($data->activitytiles_image, $PAGE->context->id, 'filter_activitytiles', 'activitytiles_image',
-        $at_settings->id, array('subdirs' => 0,
-                               'maxbytes' => get_real_size('300K'),
-                               'maxfiles' => 1,
-                            ));
+    file_save_draft_area_files($data->activitytiles_image,
+                               $PAGE->context->id,
+                               'filter_activitytiles',
+                               'activitytiles_image',
+                                $at_settings->id,
+                                array('subdirs' => 0,
+                                    'maxbytes' => MAX_BYTES,
+                                    'maxfiles' => 1,
+                                ));
+
 
     return $data;
 }
 
-
 /**
- * Serves the image file.
+ * Handles serving files for the filter_activitytiles plugin.
  *
- * @param stdClass $course
- * @param stdClass $cm
- * @param context $context
- * @param string $filearea
- * @param array $args
- * @param bool $forcedownload
- * @param array $options
- * @return mixed
+ * @param stdClass $course The course.
+ * @param stdClass $cm The course module.
+ * @param context $context The context.
+ * @param string $filearea The name of the file area.
+ * @param array $args Additional arguments (item ID, filepath, and filename).
+ * @param bool $forcedownload Whether to force download.
+ * @param array $options Additional options affecting the file serving.
  */
-function filter_activitytiles_pluginfile($course, $cm, $context, string $filearea, array $args,bool $forcedownload, array $options = []) :bool {
-
-    // Check the contextlevel.
-    if ($context->contextlevel != CONTEXT_MODULE) {
-        return false;
-    }
-
-    // Make sure the filearea is one of those used by the plugin.
+function filter_activitytiles_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     if ($filearea !== 'activitytiles_image') {
-        return false;
+        send_file_not_found();
     }
 
-    // We only need one item.
-    $itemid = 0;
+    $itemid = array_shift($args); // Get the item ID.
+    $filepath = '/'; // Default filepath.
+    $filename = array_shift($args); // Get the filename.
 
-    // Extract the filename / filepath from the $args array.
-    $filename = array_pop($args); // The last item in the $args array.
-    if (!$args) {
-        $filepath = '/'; // $args is empty => the path is '/'
-    } else {
-        $filepath = '/'.implode('/', $args).'/'; // $args contains elements of the filepath
-    }
-
-    // Retrieve the file from the Files API.
     $fs = get_file_storage();
     $file = $fs->get_file($context->id, 'filter_activitytiles', $filearea, $itemid, $filepath, $filename);
-    if (!$file) {
-        return false; // The file does not exist.
+
+    if (!$file || $file->is_directory()) {
+        send_file_not_found();
     }
 
-    // We can now send the file back to the browser - in this case with a cache lifetime of 1 day and no filtering.
-    send_stored_file($file, 86400, 0, $forcedownload, $options);
+    // Serve the file.
+    send_stored_file($file, 0, 0, $forcedownload, $options);
+}
+
+/**
+ * Returns the list of file areas for the plugin.
+ *
+ * @param stdClass $course The course.
+ * @param stdClass $cm The course module.
+ * @param context $context The context.
+ * @return array List of file areas.
+ */
+function filter_activitytiles_get_file_areas($course, $cm, $context) {
+    return [
+        'activitytiles_image' => get_string('activitytiles_image', 'filter_activitytiles'),
+    ];
 }

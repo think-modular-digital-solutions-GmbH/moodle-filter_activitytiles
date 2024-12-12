@@ -68,7 +68,7 @@ class filter_activitytiles extends moodle_text_filter {
 
                 $atoms = explode('}', $part);
 
-                // Check filter integrity.
+                // Check filter integrity and get replacement html.
                 if (count($atoms) == 2) {
                     $atoms[0] = $this->getHtml($atoms[0]);
                     $parts[$key] = implode($atoms);
@@ -78,7 +78,7 @@ class filter_activitytiles extends moodle_text_filter {
             }
         }
 
-
+        // Return the filtered text.
         return implode($parts);
     }
 
@@ -91,19 +91,20 @@ class filter_activitytiles extends moodle_text_filter {
     protected function getHtml($filtertext) {
         global $COURSE, $DB, $OUTPUT, $USER;
 
+        // Course params.
+        $courseid = $COURSE->id;
+        $format = course_get_format($courseid);
+        $modinfo = get_fast_modinfo($courseid);
+
         // See if a module type was specified.
         if (strpos($filtertext, ':')) {
             $type = trim(explode(':', $filtertext)[1]);
+            if ($type == 'selected') {
+                $selected = true;
+            } else {
+                $modtype = $type;
+            }
         }
-        if ($type == 'selected') {
-            $selected = true;
-        } else {
-            $modtype = $type;
-        }
-
-        // echo "<pre>";
-        // var_dump($modtype);
-        // die();
 
         // Build SQL across three tables.
         $sql = "SELECT fat.*, mods.name, cms.instance, cs.sequence, cs.section
@@ -149,7 +150,17 @@ class filter_activitytiles extends moodle_text_filter {
 
         // Prepare data for export to template.
         $data['mods'] = array();
+
         foreach ($sorted_mods as $mod) {
+
+            // Get module params.
+            $type = $mod->name;
+            $instanceid = $mod->course_module;
+            $context = context_module::instance($instanceid);
+            $cm = $modinfo->get_cm($instanceid);
+            if (!$cm->uservisible) {
+                continue;
+            }
 
             // Get activity type purpose.
             $mod->purpose = '';
@@ -159,36 +170,52 @@ class filter_activitytiles extends moodle_text_filter {
             }
 
             // Retrieve image.
-            $context = context_module::instance($mod->course_module);
+            $imgurl = null;
+            if ($mod->image) {
+                $fs = get_file_storage();
+                $files = $fs->get_area_files($context->id,
+                                             'filter_activitytiles',
+                                             'activitytiles_image',
+                                             $mod->id,
+                );
 
-            // $imageurl = moodle_url::make_pluginfile_url($context->id, 'filter_activitytiles', 'activitytiles_image',
-            //     0, '/', 'raspi.jpeg', false);
-                 $fs = get_file_storage();
-                 //$files = $fs->get_area_files($context->id, 'filter_activitytiles', 'activitytiles_image');
-                 $files = $fs->get_area_files($context->id, 'filter_activitytiles', 'activitytiles_image');
+                // Get the first valid file.
+                foreach ($files as $file) {
 
+                    if ($file->get_filename() === '.') {
+                        // This is the directory placeholder, skip it.
+                        // seriously, this is a thing.
+                        continue;
+                    }
 
-            //     $file = $fs->get_file($context->id, 'filter_activitytiles', 'activitytiles_image', 0, '/', 600357973);
-            // echo "<pre>";
-            // var_dump($file);
-            // var_dump($imageurl->__toString());
-            // die();
+                    $imgurl = moodle_url::make_pluginfile_url(
+                        $file->get_contextid(),
+                        $file->get_component(),
+                        $file->get_filearea(),
+                        $file->get_itemid(),
+                        $file->get_filepath(),
+                        $file->get_filename()
+                    )->out();
+                }
+            }
+
+            // Get section name.
+            $sectioninfo = $DB->get_record('course_sections', ['course' => $courseid, 'section' => $mod->section], '*', MUST_EXIST);
+            $topic = $format->get_section_name($sectioninfo);
 
             // Create array for mustache.
             $data['mods'][] = array(
                 'id' => $mod->course_module,
                 'icon' => $mod->icon,
-                // 'image' => $imageurl,
+                'image' => $imgurl,
+                'iconurl' => $OUTPUT->image_url('icon', "mod_$type"),
                 'purpose' => $mod->purpose,
                 'title' => $DB->get_record($mod->name, array('id' => $mod->instance))->name,
-                'type' => $mod->name,
-                'url' => "/mod/$mod->name/view.php?id=$mod->course_module",
+                'topic' => $topic,
+                'type' => $type,
+                'url' => new moodle_url("/mod/$mod->name/view.php", ['id' => $mod->course_module]),
             );
         }
-
-        // echo "<pre>";
-        // var_dump($data);
-        // die();
 
         // Render from template.
         $template = 'activitytiles';
