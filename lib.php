@@ -47,6 +47,8 @@ function filter_activitytiles_get_additional_form_elements($mform) {
 
     // Include checkbox.
     $mform->addElement('checkbox', 'activitytiles_include', get_string('include', 'filter_activitytiles'));
+    $mform->setType('activitytiles_include', PARAM_BOOL);
+    $mform->addHelpButton('activitytiles_include', 'include', 'filter_activitytiles');
 
     // Fontawesome icon.
     $mform->addElement('text', 'activitytiles_icon', get_string('icon', 'filter_activitytiles'));

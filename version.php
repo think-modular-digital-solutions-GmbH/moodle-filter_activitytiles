@@ -17,7 +17,7 @@
 /**
  * Version details
  *
- * @package    filter_activitytiles 
+ * @package    filter_activitytiles
  * @copyright  2023 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

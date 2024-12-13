@@ -85,20 +85,23 @@ class filter_activitytiles extends moodle_text_filter {
     /**
      * Returns a list of modules in this course according to filter options.
      *
-     * @param string $filtertext text to be replaced
+     * @param string $text text to be replaced
      * @return string
      */
-    protected function getHtml($filtertext) {
+    protected function getHtml($text) {
         global $COURSE, $DB, $OUTPUT, $USER;
 
         // Course params.
         $courseid = $COURSE->id;
         $format = course_get_format($courseid);
         $modinfo = get_fast_modinfo($courseid);
+        $completion = new completion_info($COURSE);
 
         // See if a module type was specified.
-        if (strpos($filtertext, ':')) {
-            $type = trim(explode(':', $filtertext)[1]);
+        if (strpos($text, 'mods=')) {
+            $type = explode('mods=', $text)[1];
+            $type = explode(' ', $type)[0];
+            $type = trim($type);
             if ($type == 'selected') {
                 $selected = true;
             } else {
@@ -155,11 +158,28 @@ class filter_activitytiles extends moodle_text_filter {
 
             // Get module params.
             $type = $mod->name;
-            $instanceid = $mod->course_module;
-            $context = context_module::instance($instanceid);
-            $cm = $modinfo->get_cm($instanceid);
+            $moduleid = $mod->course_module;
+            $instanceid = $mod->instance;
+            $title = $DB->get_record($type, array('id' => $instanceid))->name;
+            $context = context_module::instance($moduleid);
+            $cm = $modinfo->get_cm($moduleid);
+
+            // Check availability.
             if (!$cm->uservisible) {
                 continue;
+            }
+
+            // Get completion state.
+            $completionstate = null;
+            if ($completion->is_enabled($cm)) {
+                $completiondata = $completion->get_data($cm, true, $USER->id);
+                $completionstate = $completiondata->completionstate;
+
+                // Other completion status might not be supported (yet).
+                if ($completionstate < 0 || $completionstate > 3) {
+                    $completionstate = 0;
+                }
+                $completionelement = $OUTPUT->render_from_template("filter_activitytiles/completionstate$completionstate", ['title' => $mod->name]);
             }
 
             // Get activity type purpose.
@@ -205,21 +225,29 @@ class filter_activitytiles extends moodle_text_filter {
 
             // Create array for mustache.
             $data['mods'][] = array(
+                'completion' => $completionelement,
                 'id' => $mod->course_module,
                 'icon' => $mod->icon,
                 'image' => $imgurl,
                 'iconurl' => $OUTPUT->image_url('icon', "mod_$type"),
                 'purpose' => $mod->purpose,
-                'title' => $DB->get_record($mod->name, array('id' => $mod->instance))->name,
+                'title' => $title,
                 'topic' => $topic,
                 'type' => $type,
                 'url' => new moodle_url("/mod/$mod->name/view.php", ['id' => $mod->course_module]),
             );
         }
 
-        // Render from template.
+        // Get custom template.
         $template = 'activitytiles';
-        return $OUTPUT->render_from_template('filter_activitytiles/' . $template, $data);   ;
+        if (strpos($text, 'template=')) {
+            $template = explode('template=', $text)[1];
+            $template = explode(' ', $template)[0];
+            $template = trim($template);
+        }
+
+        // Render from template.
+        return $OUTPUT->render_from_template('filter_activitytiles/' . $template, $data);
 
     }
 

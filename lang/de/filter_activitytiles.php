@@ -24,9 +24,9 @@
  */
 
 $string['filtername'] = 'Activity Tiles';
-$string['errormsg'] = 'Malformed activitytiles filter found - ignoring all activitytiles elements in this text.';
-$string['include'] = 'Select this activity';
-$string['include_help'] = 'Select this activity to be included in the activity tiles when run via {activitytiles mods=selected}';
-$string['icon'] = 'Fontaweseome icon for this activity (eg: edit, book, globe, ...)';
-$string['image'] = 'Image for this activity';
-$string['privacy:metadata'] = 'The Activity Tiles filter plugin does not store any personal data.';
+$string['errormsg'] = 'Syntaxfehler im Activitytiles Textfilter - ignoriere alle activitytiles Elemente im Text.';
+$string['include'] = 'Diese Aktivität auswählen';
+$string['include_help'] = 'Diese Aktivität wird angezeigt, wenn Sie Activity Tiles via {activitytiles mods=selected} einbinden.';
+$string['icon'] = 'Fontaweseome Icon für diese Aktivität (zB: edit, book, globe, ...)';
+$string['image'] = 'Bild für diese Aktivität';
+$string['privacy:metadata'] = 'Das Activity Tiles Filter Plugin speichert keine persönlichen Daten.';

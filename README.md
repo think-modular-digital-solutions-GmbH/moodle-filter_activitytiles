@@ -14,9 +14,9 @@ Just enter **{activitytiles}** in any text to render the activitytiles there.
 
 ### Selecting specific activities / activity types
 
-Optionally, you can only display a specific type of activities, for example **{activitytiles:assign}** will only display assignments.
+Optionally, you can only display a specific type of activities, for example **{activitytiles mods=assign}** will only display assignments.
 
-If you only want to display, you can do this with **{activitytiles:selected}**. This will only display activities, that have the "Selected for tiles" checkbox set in the **Activity Tiles Settings** section of the activity's settings.
+If you only want to display, you can do this with **{activitytiles mods=selected}**. This will only display activities, that have the "Selected for tiles" checkbox set in the **Activity Tiles Settings** section of the activity's settings.
 
 ### Style
 

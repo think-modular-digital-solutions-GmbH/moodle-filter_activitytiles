@@ -19,6 +19,13 @@
     height: 100% !important;
 }
 .activitytiles-modicon > img {
-    height: 70% !important;
-    width: 70% !important;
+    height: 100px !important;
+    width: 100px !important;
+}
+
+.activitytiles-completion {
+    justify-content: end;
+    display: flex;
+    padding: 0 1em 1em 1em;
+    order: 3;
 }
