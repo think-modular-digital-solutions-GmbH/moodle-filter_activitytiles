@@ -29,3 +29,22 @@
     padding: 0 1em 1em 1em;
     order: 3;
 }
+
+.activitytiles-availability {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    margin: 0 !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.activitytiles-notavailable {
+    opacity: 0.5;
+}
+
+.activitytiles-availability-text {
+    z-index: 9;
+    margin: 1em;
+}

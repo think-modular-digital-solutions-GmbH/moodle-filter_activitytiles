@@ -10,15 +10,25 @@ Note: if you want to use this plugin inside of blocks, you have to turn it ON fo
 
 ## Usage
 
-Just enter **{activitytiles}** in any text to render the activitytiles there.
+Just enter **{{ activitytiles }}** in any text to render the activitytiles there.
 
-### Selecting specific activities / activity types
+## Options
 
-Optionally, you can only display a specific type of activities, for example **{activitytiles mods=assign}** will only display assignments.
+- **Selecting specific activities / activity types**
 
-If you only want to display, you can do this with **{activitytiles mods=selected}**. This will only display activities, that have the "Selected for tiles" checkbox set in the **Activity Tiles Settings** section of the activity's settings.
+Optionally, you can only display a specific type of activities, for example *{{ activitytiles mods=assign }}* will only display assignments.
 
-### Style
+If you only want to display, you can do this with *{activitytiles mods=selected}*. This will only display activities, that have the "Selected for tiles" checkbox set in the **Activity Tiles Settings** section of the activity's settings.
+
+- **template**: alternative mustache template to use instead of of the built-in coursecards - *eg: template=list*.
+
+You can put your own templates into the /templates subfolder, or use the existing ones.
+
+You can also use templates from other components by specifying them with their full name, eg *theme_tm_moove/custom_coursecards*
+
+## Style
+
+For every activity, you have a new settings section for activitytiles.
 
 There, you can also optionally set a fontawesome icon or image for each activity, to make your tiles look even more beautiful.
 

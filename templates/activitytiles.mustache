@@ -1,7 +1,15 @@
 <div class="card-deck dashboard-card-deck " data-region="card-deck" role="list">
     {{#mods}}
         <div class="card dashboard-card" role="listitem" data-region="course-content">
-            <a class="text-decoration-none" href="{{url}}" tabindex="-1">
+            {{#notavailable}}
+                <a class="activitytiles-availability course-section" href="{{url}}" tabindex="-1">
+                    <div class="activity-availability availabilityinfo isrestricted activitytiles-availability-text">
+                        {{#pix}}t/unlock, core{{/pix}}
+                        {{#str}}notavailable, filter_activitytiles{{/str}}
+                    </div>
+                </a>
+            {{/notavailable}}
+            <a class="text-decoration-none {{#notavailable}}activitytiles-notavailable{{/notavailable}}" href="{{url}}" tabindex="-1">
                 <div class="card-img dashboard-card-img activitytiles-image" style="background-image: url({{image}});">
                     <div class="course-category activitytiles-topic">
                         {{topic}}
@@ -19,7 +27,7 @@
                     {{/image}}
                 </div>
             </a>
-            <div class="card-body pr-1 course-info-container" id="course-info-container-186-5">
+            <div class="card-body pr-1 course-info-container {{#notavailable}}activitytiles-notavailable{{/notavailable}}" id="course-info-container-186-5">
                 <div class="d-flex align-items-start">
                     <div class="w-100">
                         <a class="text-decoration-none" href="{{url}}" class="aalink coursename mr-2 mb-1">

@@ -34,9 +34,10 @@ require_once($CFG->dirroot . '/course/renderer.php');
 
 class filter_activitytiles extends moodle_text_filter {
 
-    const TOKEN = '{activitytiles';
+    const TOKEN = '{{ activitytiles ';
 
-    function filter($text, array $options = array()) {
+    #[\Override]
+    public function filter($text, array $options = array()) {
         global $CFG, $PAGE;
 
         if (empty($text) or is_numeric($text)) {
@@ -66,7 +67,7 @@ class filter_activitytiles extends moodle_text_filter {
 
             if (strpos($part, self::TOKEN) === 0) {
 
-                $atoms = explode('}', $part);
+                $atoms = explode(' }}', $part);
 
                 // Check filter integrity and get replacement html.
                 if (count($atoms) == 2) {
@@ -95,7 +96,7 @@ class filter_activitytiles extends moodle_text_filter {
         $courseid = $COURSE->id;
         $format = course_get_format($courseid);
         $modinfo = get_fast_modinfo($courseid);
-        $completion = new completion_info($COURSE);
+        $completion = new \completion_info($COURSE);
 
         // See if a module type was specified.
         if (strpos($text, 'mods=')) {
@@ -110,9 +111,9 @@ class filter_activitytiles extends moodle_text_filter {
         }
 
         // Build SQL across three tables.
-        $sql = "SELECT fat.*, mods.name, cms.instance, cs.sequence, cs.section
-                  FROM {filter_activitytiles} fat
-                  JOIN {course_modules} cms
+        $sql = "SELECT cms.id, mods.name, cms.instance, cs.sequence, cs.section, fat.course_module, fat.include, fat.icon, fat.image
+                  FROM {course_modules} cms
+                  LEFT JOIN {filter_activitytiles} fat
                     ON fat.course_module = cms.id
                   JOIN {modules} mods
                     ON cms.module = mods.id
@@ -146,7 +147,7 @@ class filter_activitytiles extends moodle_text_filter {
         // Sort by position in section.
         foreach ($mods as $mod) {
             $order = $mod->section * 1000;
-            $order += strpos($mod->sequence, $mod->course_module);
+            $order += strpos($mod->sequence, $mod->id);
             $sorted_mods[$order] = $mod;
         }
         ksort($sorted_mods);
@@ -158,19 +159,33 @@ class filter_activitytiles extends moodle_text_filter {
 
             // Get module params.
             $type = $mod->name;
-            $moduleid = $mod->course_module;
+            $moduleid = $mod->id;
             $instanceid = $mod->instance;
             $title = $DB->get_record($type, array('id' => $instanceid))->name;
-            $context = context_module::instance($moduleid);
+            $context = \context_module::instance($moduleid);
             $cm = $modinfo->get_cm($moduleid);
+            $section = $modinfo->get_section_info($mod->section);
+            $url = new \moodle_url("/mod/$mod->name/view.php", ['id' => $mod->course_module]);
+
+            // Check visibility.
+            if (!$cm->is_visible_on_course_page()) {
+                continue;
+            }
 
             // Check availability.
-            if (!$cm->uservisible) {
-                continue;
+            $notavailable = "";
+            if (!$cm->get_user_visible()) {
+                $availability = new availability($format, $section, $cm);
+                $availability_info = $availability->export_for_template($OUTPUT)->info;
+                foreach ($availability_info as $ainfo) {
+                    $notavailable .= $ainfo->text;
+                }
+
             }
 
             // Get completion state.
             $completionstate = null;
+            $completionelement = null;
             if ($completion->is_enabled($cm)) {
                 $completiondata = $completion->get_data($cm, true, $USER->id);
                 $completionstate = $completiondata->completionstate;
@@ -208,7 +223,7 @@ class filter_activitytiles extends moodle_text_filter {
                         continue;
                     }
 
-                    $imgurl = moodle_url::make_pluginfile_url(
+                    $imgurl = \moodle_url::make_pluginfile_url(
                         $file->get_contextid(),
                         $file->get_component(),
                         $file->get_filearea(),
@@ -230,20 +245,34 @@ class filter_activitytiles extends moodle_text_filter {
                 'icon' => $mod->icon,
                 'image' => $imgurl,
                 'iconurl' => $OUTPUT->image_url('icon', "mod_$type"),
+                'notavailable' => $notavailable,
                 'purpose' => $mod->purpose,
                 'title' => $title,
                 'topic' => $topic,
                 'type' => $type,
-                'url' => new moodle_url("/mod/$mod->name/view.php", ['id' => $mod->course_module]),
+                'url' => $url,
             );
         }
 
         // Get custom template.
         $template = 'activitytiles';
         if (strpos($text, 'template=')) {
-            $template = explode('template=', $text)[1];
-            $template = explode(' ', $template)[0];
-            $template = trim($template);
+            $alttemplate = explode('template=', $text)[1];
+            $alttemplate = explode(' ', $template)[0];
+            $alttemplate = trim($template);
+
+            // Render from template.
+            if (str_contains($alttemplate, '/')) {
+                $output .= $OUTPUT->render_from_template($alttemplate, $data);
+            } else {
+            // Check if template exists.
+                $template_file_path = $CFG->dirroot . "/filter/courselist/templates/$alttemplate" . '.mustache';
+                if (file_exists($template_file_path)) {
+                    $output .= $OUTPUT->render_from_template('filter_courselist/' . $alttemplate, $data);
+                } else {
+                    $output = $this->return_error(get_string('errortemplate', 'filter_courselist') . $template_file_path, $text);
+                }
+            }
         }
 
         // Render from template.

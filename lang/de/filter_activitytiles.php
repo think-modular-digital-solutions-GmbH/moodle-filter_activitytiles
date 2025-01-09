@@ -29,4 +29,5 @@ $string['include'] = 'Diese Aktivität auswählen';
 $string['include_help'] = 'Diese Aktivität wird angezeigt, wenn Sie Activity Tiles via {activitytiles mods=selected} einbinden.';
 $string['icon'] = 'Fontaweseome Icon für diese Aktivität (zB: edit, book, globe, ...)';
 $string['image'] = 'Bild für diese Aktivität';
+$string['notavailable'] = 'Diese Aktivität ist nicht verfügbar. Klicken Sie für mehr Informationen.';
 $string['privacy:metadata'] = 'Das Activity Tiles Filter Plugin speichert keine persönlichen Daten.';

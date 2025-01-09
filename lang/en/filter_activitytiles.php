@@ -29,4 +29,5 @@ $string['include'] = 'Select this activity';
 $string['include_help'] = 'Select this activity to be included in the activity tiles when run via {activitytiles mods=selected}';
 $string['icon'] = 'Fontaweseome icon for this activity (eg: edit, book, globe, ...)';
 $string['image'] = 'Image for this activity';
+$string['notavailable'] = 'This activity is not available. Click for more info.';
 $string['privacy:metadata'] = 'The Activity Tiles filter plugin does not store any personal data.';
