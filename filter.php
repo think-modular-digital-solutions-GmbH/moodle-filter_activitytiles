@@ -189,14 +189,13 @@ class filter_activitytiles extends moodle_text_filter {
             }
 
             // Check availability.
-            $notavailable = "";
+            $notavailable = false;
             if (!$cm->get_user_visible()) {
-                $availability = new availability($format, $section, $cm);
-                $availability_info = $availability->export_for_template($OUTPUT)->info;
-                foreach ($availability_info as $ainfo) {
-                    $notavailable .= $ainfo->text;
+                $availability = new core_availability\info_module($cm);
+                $isavailable = $availability->is_available($information, true, $userid);
+                if (!$isavailable) {
+                    $notavailable = true;
                 }
-
             }
 
             // Get completion state.

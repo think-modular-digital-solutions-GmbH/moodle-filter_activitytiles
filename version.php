@@ -28,5 +28,5 @@ $plugin->component = 'filter_activitytiles';
 $plugin->requires  = 2021040100;
 
 $plugin->version   = 202502100002;
-$plugin->release = '4.1 - 1.0.3';
+$plugin->release = '4.1 - 1.0.4';
 $plugin->maturity = MATURITY_STABLE;
