@@ -118,7 +118,7 @@ class filter_activitytiles extends moodle_text_filter {
         }
 
         // Build SQL across three tables.
-        $sql = "SELECT cms.id, mods.name, cms.instance, cs.sequence, cs.section, fat.course_module, fat.include, fat.icon, fat.image
+        $sql = "SELECT cms.id, mods.name, cms.instance, cs.sequence, cs.section, fat.course_module, fat.include, fat.icon, fat.image, fat.id AS fatid
                   FROM {course_modules} cms
                   LEFT JOIN {filter_activitytiles} fat
                     ON fat.course_module = cms.id
@@ -191,7 +191,7 @@ class filter_activitytiles extends moodle_text_filter {
             // Check availability.
             $notavailable = false;
             if (!$cm->get_user_visible()) {
-                $availability = new core_availability\info_module($cm);
+                $availability = new \core_availability\info_module($cm);
                 $isavailable = $availability->is_available($information, true, $userid);
                 if (!$isavailable) {
                     $notavailable = true;
@@ -226,7 +226,7 @@ class filter_activitytiles extends moodle_text_filter {
                 $files = $fs->get_area_files($context->id,
                                              'filter_activitytiles',
                                              'activitytiles_image',
-                                             $mod->instance,
+                                             $mod->fatid,
                 );
 
                 // Get the first valid file.
