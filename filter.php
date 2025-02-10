@@ -165,7 +165,7 @@ class filter_activitytiles extends moodle_text_filter {
             $context = \context_module::instance($moduleid);
             $cm = $modinfo->get_cm($moduleid);
             $section = $modinfo->get_section_info($mod->section);
-            $url = new \moodle_url("/mod/$mod->name/view.php", ['id' => $mod->course_module]);
+            $url = new \moodle_url("/mod/$mod->name/view.php", ['id' => $moduleid]);
 
             // Check visibility.
             if (!$cm->is_visible_on_course_page()) {
@@ -211,7 +211,7 @@ class filter_activitytiles extends moodle_text_filter {
                 $files = $fs->get_area_files($context->id,
                                              'filter_activitytiles',
                                              'activitytiles_image',
-                                             $mod->id,
+                                             $moduleid,
                 );
 
                 // Get the first valid file.
@@ -241,7 +241,7 @@ class filter_activitytiles extends moodle_text_filter {
             // Create array for mustache.
             $data['mods'][] = array(
                 'completion' => $completionelement,
-                'id' => $mod->course_module,
+                'id' => $moduleid,
                 'icon' => $mod->icon,
                 'image' => $imgurl,
                 'iconurl' => $OUTPUT->image_url('icon', "mod_$type"),
