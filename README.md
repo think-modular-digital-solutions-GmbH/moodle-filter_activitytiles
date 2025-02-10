@@ -22,9 +22,13 @@ Alternatively, if you only want to display certain **manually selected** activit
 
 You can also filter by section(s), and combine this with filtering for type. For example: {{ activitityiles mods=assign,forum sections=1,3 }}
 
-- **template**: alternative mustache template to use instead of of the built-in coursecards - *eg: template=list*.
+- **template**: alternative mustache template to use instead of of the built-in coursecards - *eg: template=simplecard*.
 
 You can put your own templates into the /templates subfolder, or use the existing ones.
+
+Right now, there are two alternative templates:
+- simplecard: a simpler card without the badge for the course section
+- linksonly: text-only list of links to activities
 
 You can also use templates from other components by specifying them with their full name, eg *theme_tm_moove/custom_coursecards*
 

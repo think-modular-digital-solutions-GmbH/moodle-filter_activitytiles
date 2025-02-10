@@ -1,0 +1,44 @@
+<div class="card-deck dashboard-card-deck " data-region="card-deck" role="list">
+    {{#mods}}
+        <div class="card dashboard-card" role="listitem" data-region="course-content">
+            {{#notavailable}}
+                <a class="activitytiles-availability course-section" href="{{url}}" tabindex="-1">
+                    <div class="activity-availability availabilityinfo isrestricted activitytiles-availability-text">
+                        {{#pix}}t/unlock, core{{/pix}}
+                        {{#str}}notavailable, filter_activitytiles{{/str}}
+                    </div>
+                </a>
+            {{/notavailable}}
+            <a class="text-decoration-none {{#notavailable}}activitytiles-notavailable{{/notavailable}}" href="{{url}}" tabindex="-1">
+                <div class="card-img dashboard-card-img activitytiles-image" style="background-image: url({{image}});">
+                    {{^image}}
+                        {{#icon}}
+                            <i class="activitytiles-modicon fa fa-{{icon}} fa-fw"></i>
+                        {{/icon}}
+                        {{^icon}}
+                            <div class="activitytiles-modicon optionicon icon-no-margin modicon_assign activityiconcontainer {{purpose}}">
+                                <img class="icon activityicon" aria-hidden="true" src="{{ iconurl }}">
+                            </div>
+                        {{/icon}}
+                    {{/image}}
+                </div>
+                <div class="card-body pr-1 course-info-container {{#notavailable}}activitytiles-notavailable{{/notavailable}}" id="course-info-container-186-5">
+                    <div class="d-flex align-items-start">
+                        <div class="w-100">
+                            <span class="sr-only">
+                                Activity name
+                            </span>
+                            <span class="multiline text-dark">
+                                {{title}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {{{completion}}}
+        </div>
+    {{/mods}}
+</div>
+
+
+

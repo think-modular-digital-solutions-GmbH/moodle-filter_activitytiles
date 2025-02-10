@@ -90,7 +90,7 @@ class filter_activitytiles extends moodle_text_filter {
      * @return string
      */
     protected function getHtml($text) {
-        global $COURSE, $DB, $OUTPUT, $USER;
+        global $CFG, $COURSE, $DB, $OUTPUT, $USER;
 
         // Course params.
         $courseid = $COURSE->id;
@@ -274,19 +274,18 @@ class filter_activitytiles extends moodle_text_filter {
         $template = 'activitytiles';
         if (strpos($text, 'template=')) {
             $alttemplate = explode('template=', $text)[1];
-            $alttemplate = explode(' ', $template)[0];
-            $alttemplate = trim($template);
-
+            $alttemplate = explode(' ', $alttemplate)[0];
+            $alttemplate = trim($alttemplate);
             // Render from template.
             if (str_contains($alttemplate, '/')) {
-                $output .= $OUTPUT->render_from_template($alttemplate, $data);
+                return $OUTPUT->render_from_template($alttemplate, $data);
             } else {
             // Check if template exists.
-                $template_file_path = $CFG->dirroot . "/filter/courselist/templates/$alttemplate" . '.mustache';
+                $template_file_path = $CFG->dirroot . "/filter/activitytiles/templates/$alttemplate" . '.mustache';
                 if (file_exists($template_file_path)) {
-                    $output .= $OUTPUT->render_from_template('filter_courselist/' . $alttemplate, $data);
+                    return $OUTPUT->render_from_template('filter_activitytiles/' . $alttemplate, $data);
                 } else {
-                    $output = $this->return_error(get_string('errortemplate', 'filter_courselist') . $template_file_path, $text);
+                    return $this->return_error(get_string('errortemplate', 'filter_courselist') . $template_file_path, $text);
                 }
             }
         }
