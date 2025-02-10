@@ -98,7 +98,7 @@ class filter_activitytiles extends moodle_text_filter {
         $modinfo = get_fast_modinfo($courseid);
         $completion = new \completion_info($COURSE);
 
-        // See if a module type was specified.
+        // Get module type(s).
         if (strpos($text, 'mods=')) {
             $type = explode('mods=', $text)[1];
             $type = explode(' ', $type)[0];
@@ -108,6 +108,13 @@ class filter_activitytiles extends moodle_text_filter {
             } else {
                 $modtype = $type;
             }
+        }
+
+        // Get section(s).
+        if (strpos($text, 'sections=')) {
+            $section = explode('sections=', $text)[1];
+            $section = explode(' ', $section)[0];
+            $section = trim($section);
         }
 
         // Build SQL across three tables.
@@ -121,9 +128,23 @@ class filter_activitytiles extends moodle_text_filter {
                     ON cms.section = cs.id
                  WHERE cms.course = :courseid";
 
-        // Add additional WHERE if modtype is specified.
-        if (isset($modtype)) {
-            $sql .= "AND mods.name = :name";
+        // Prepare parameters.
+        $params = ['courseid' => $COURSE->id];
+
+        // Add parameter for mod types.
+        if (!empty($modtype)) {
+            $modtypes = array_map('trim', explode(',', $modtype));
+            list($sqlin, $inparams) = $DB->get_in_or_equal($modtypes, SQL_PARAMS_NAMED, 'modname');
+            $sql .= " AND mods.name $sqlin";
+            $params += $inparams;
+        }
+
+        // Add parameter for sections.
+        if (!empty($section)) {
+            $sections = array_map('trim', explode(',', $section));
+            list($sqlin, $inparams) = $DB->get_in_or_equal($sections, SQL_PARAMS_NAMED, 'section');
+            $sql .= " AND cs.section $sqlin";
+            $params += $inparams;
         }
 
         // Add addtional WHERE if only selected mods should be shown.
@@ -135,11 +156,6 @@ class filter_activitytiles extends moodle_text_filter {
         $sql .= " AND mods.name != 'label'";
 
         // Run query.
-        if (!empty($modtype)) {
-            $params = array('courseid' => $COURSE->id, 'name' => $modtype);
-        } else {
-            $params = array('courseid' => $COURSE->id);
-        }
         if (!$mods = $DB->get_records_sql($sql, $params)) {
             return '';
         }

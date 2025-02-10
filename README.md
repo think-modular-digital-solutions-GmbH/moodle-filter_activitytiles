@@ -16,9 +16,11 @@ Just enter **{{ activitytiles }}** in any text to render the activitytiles there
 
 - **Selecting specific activities / activity types**
 
-Optionally, you can only display a specific type of activities, for example *{{ activitytiles mods=assign }}* will only display assignments.
+You can only display specific **types** of activities, for example *{{ activitytiles mods=assign,forum }}* will only display assignments and forum.
 
-If you only want to display, you can do this with *{activitytiles mods=selected}*. This will only display activities, that have the "Selected for tiles" checkbox set in the **Activity Tiles Settings** section of the activity's settings.
+Alternatively, if you only want to display certain **manually selected** activities, you can do this with *{{ activitytiles mods=selected }}*. This will only display activities, that have the "Selected this activity" checkbox set in the **Activity Tiles** section of the activity's settings.
+
+You can also filter by section(s), and combine this with filtering for type. For example: {{ activitityiles mods=assign,forum sections=1,3 }}
 
 - **template**: alternative mustache template to use instead of of the built-in coursecards - *eg: template=list*.
 
