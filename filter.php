@@ -211,7 +211,7 @@ class filter_activitytiles extends moodle_text_filter {
                 $files = $fs->get_area_files($context->id,
                                              'filter_activitytiles',
                                              'activitytiles_image',
-                                             $moduleid,
+                                             $mod->instance,
                 );
 
                 // Get the first valid file.
