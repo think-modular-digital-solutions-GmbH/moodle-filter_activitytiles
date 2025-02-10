@@ -255,7 +255,9 @@ class filter_activitytiles extends moodle_text_filter {
 
             // Create array for mustache.
             $data['mods'][] = array(
+                'categoryid' => $COURSE->category,
                 'completion' => $completionelement,
+                'courseid' => $courseid,
                 'id' => $moduleid,
                 'icon' => $mod->icon,
                 'image' => $imgurl,
