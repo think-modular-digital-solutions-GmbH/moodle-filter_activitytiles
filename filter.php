@@ -184,7 +184,7 @@ class filter_activitytiles extends moodle_text_filter {
             $url = new \moodle_url("/mod/$mod->name/view.php", ['id' => $moduleid]);
 
             // Check visibility.
-            if (!$cm->is_visible_on_course_page()) {
+            if (!$cm->is_visible_on_course_page() && !$cm->is_stealth()) {
                 continue;
             }
 
