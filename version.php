@@ -27,6 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->component = 'filter_activitytiles';
 $plugin->requires  = 2021040100;
 
-$plugin->version   = 202502180001;
-$plugin->release = '4.1 - 1.0.5';
+$plugin->version   = 202503040001;
+$plugin->release = '4.1 - 1.0.6';
 $plugin->maturity = MATURITY_STABLE;
