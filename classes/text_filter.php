@@ -21,18 +21,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->dirroot . '/course/renderer.php');
+namespace filter_activitytiles;
 
 /**
- * Implementation of the Moodle filter API for the Courselist filter.
+ * Implementation of the Moodle filter API for the Activitytiles filter.
  *
  * @copyright  2023 think-modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-class filter_activitytiles extends moodle_text_filter {
+class text_filter extends \core_filters\text_filter {
 
     const TOKEN = '{{ activitytiles ';
 
